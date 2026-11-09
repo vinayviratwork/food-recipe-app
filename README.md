@@ -1,47 +1,54 @@
 # 🍽️ Food Recipe App — REST API
 
-A production-ready **RESTful backend API** for a food recipe platform, built with the MERN stack (Node.js + Express + MongoDB). Features JWT authentication, role-based access control, full-text search, pagination, and multiple security layers.
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4.x-000000?style=flat&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose%208-47A248?style=flat&logo=mongodb&logoColor=white)
+![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=flat&logo=jsonwebtokens&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-blue?style=flat)
+
+A production-ready **RESTful backend API** for a food recipe platform built with Node.js, Express, and MongoDB. Includes JWT authentication, role-based access control, full-text search, pagination, star ratings, and multiple security hardening layers.
 
 ---
 
-## Tech Stack
+## ✨ Features
+
+- **JWT Authentication** — secure register/login with bcrypt password hashing (12 salt rounds)
+- **Role-Based Access Control** — users vs admins; only authors/admins can edit or delete recipes
+- **Recipe Ratings** — users can rate recipes 1–5 stars with running average calculation
+- **Full-Text Search** — MongoDB compound text index on title and description
+- **Pagination & Filtering** — filter by category, difficulty, tags; sort by newest, popularity, or cooking time
+- **Save Recipes** — toggle save/unsave recipes to a personal list
+- **Change Password** — secure endpoint requiring current password verification
+- **Security Hardened** — Helmet headers, CORS allowlist, 10kb body limit, global + auth rate limiting
+- **Centralised Error Handling** — differentiates dev vs prod; handles Mongoose CastError, duplicate keys, JWT errors
+- **Graceful Shutdown** — catches unhandled rejections and closes server cleanly
+
+---
+
+## 🛠️ Tech Stack
 
 | Layer | Technology |
 |---|---|
 | Runtime | Node.js 18+ |
 | Framework | Express 4 |
 | Database | MongoDB + Mongoose 8 |
-| Authentication | JWT (jsonwebtoken) + bcryptjs |
+| Authentication | JWT + bcryptjs (12 rounds) |
 | Security | Helmet, CORS allowlist, express-rate-limit |
 | Logging | Morgan |
 
 ---
 
-## Features
-
-- **JWT Authentication** — secure register/login with bcrypt password hashing (12 salt rounds)
-- **Role-Based Access Control** — users vs admins; only authors/admins can edit or delete their recipes
-- **Full-Text Search** — MongoDB compound text index on recipe title and description
-- **Pagination & Filtering** — filter by category, difficulty, tags; sort by newest, popularity, or cooking time
-- **Save Recipes** — users can save/unsave any recipe to a personal list
-- **Security Hardened** — Helmet headers, CORS allowlist, body size limits (10kb), global + auth-specific rate limiting
-- **Centralised Error Handling** — differentiates dev vs prod error responses; handles Mongoose and JWT errors gracefully
-- **Graceful Shutdown** — catches unhandled promise rejections and closes the server cleanly
-
----
-
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
-
 - Node.js v18+
-- MongoDB (local or Atlas)
+- MongoDB (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
 
 ### Installation
 
 ```bash
 # 1. Clone the repo
-git clone <your-repo-url>
+git clone https://github.com/vinayviratwork/food-recipe-app.git
 cd food-recipe-app
 
 # 2. Install dependencies
@@ -49,57 +56,57 @@ npm install
 
 # 3. Configure environment variables
 cp .env.example .env
-# Edit .env and fill in your MongoDB URI, JWT secret, etc.
+# Edit .env and fill in your values
 
 # 4. Start the development server
 npm run dev
 ```
 
-The API will be running at `http://localhost:5000`
+API runs at → `http://localhost:5000`
 
 ---
 
-## Environment Variables
+## ⚙️ Environment Variables
 
-Copy `.env.example` to `.env` and set the following:
+Copy `.env.example` to `.env`:
 
 | Variable | Description |
 |---|---|
-| `PORT` | Server port (default: 5000) |
+| `PORT` | Server port (default: `5000`) |
 | `NODE_ENV` | `development` or `production` |
 | `MONGO_URI` | MongoDB connection string |
-| `JWT_SECRET` | Long random string for signing JWTs |
+| `JWT_SECRET` | Long random secret for signing JWTs |
 | `JWT_EXPIRES_IN` | Token expiry e.g. `7d` |
 | `ALLOWED_ORIGINS` | Comma-separated CORS origins |
 
 ---
 
-## API Endpoints
+## 📡 API Reference
 
 ### Auth — `/api/auth`
 
-| Method | Path | Description | Auth |
+| Method | Endpoint | Description | Auth |
 |---|---|---|---|
 | POST | `/api/auth/register` | Register a new user | ❌ |
 | POST | `/api/auth/login` | Login and receive JWT | ❌ |
 | GET | `/api/auth/me` | Get current user profile | ✅ |
-| PATCH | `/api/auth/me` | Update profile (username, bio, profileImage) | ✅ |
+| PATCH | `/api/auth/update-profile` | Update username, bio, profileImage | ✅ |
 | PATCH | `/api/auth/change-password` | Change password (requires currentPassword) | ✅ |
 
 ### Recipes — `/api/recipes`
 
-| Method | Path | Description | Auth |
+| Method | Endpoint | Description | Auth |
 |---|---|---|---|
 | GET | `/api/recipes` | List recipes (paginated, filterable) | ❌ |
-| GET | `/api/recipes/:id` | Get single recipe | ❌ |
+| GET | `/api/recipes/:id` | Get a single recipe | ❌ |
 | POST | `/api/recipes` | Create a recipe | ✅ |
 | PATCH | `/api/recipes/:id` | Update a recipe (author/admin only) | ✅ |
 | DELETE | `/api/recipes/:id` | Delete a recipe (author/admin only) | ✅ |
+| POST | `/api/recipes/:id/rate` | Rate a recipe (1–5 stars) | ✅ |
 | GET | `/api/recipes/user/saved` | Get current user's saved recipes | ✅ |
 | POST | `/api/recipes/:id/save` | Toggle save/unsave a recipe | ✅ |
-| POST | `/api/recipes/:id/rate` | Rate a recipe (1–5 stars) | ✅ |
 
-### Query Parameters for `GET /api/recipes`
+### Query Parameters — `GET /api/recipes`
 
 | Param | Example | Description |
 |---|---|---|
@@ -107,57 +114,60 @@ Copy `.env.example` to `.env` and set the following:
 | `limit` | `?limit=10` | Results per page (max: 50) |
 | `category` | `?category=dinner` | Filter by category |
 | `difficulty` | `?difficulty=beginner` | Filter by difficulty |
-| `tags` | `?tags=italian,vegetarian` | Filter by tags (comma-separated, AND logic) |
+| `tags` | `?tags=italian,vegetarian` | Comma-separated tags (AND logic) |
 | `search` | `?search=pasta` | Full-text search on title + description |
-| `sort` | `?sort=popular` | Sort: `newest`, `popular`, `cookingTime` |
+| `sort` | `?sort=popular` | `newest` \| `popular` \| `cookingTime` |
 
-### Health Check
+### Health
 
-| Method | Path | Description |
+| Method | Endpoint | Description |
 |---|---|---|
-| GET | `/health` | Server + environment status |
+| GET | `/health` | Server status + environment |
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 food-recipe-app/
-├── app.js                  # Express app entry point
+├── app.js                      # Express app + middleware setup
 ├── config/
-│   └── db.js               # MongoDB connection
+│   └── db.js                   # MongoDB connection
 ├── controllers/
-│   ├── authController.js   # Register, login, profile management
-│   └── recipeController.js # CRUD, save/unsave, search
+│   ├── authController.js       # Register, login, profile, password
+│   └── recipeController.js     # CRUD, save, rate, search
 ├── middlewares/
-│   ├── auth.js             # JWT verification (protectRoute)
-│   └── errorHandler.js     # Centralised error handler
+│   ├── auth.js                 # JWT verification middleware
+│   └── errorHandler.js         # Global error handler
 ├── models/
-│   ├── User.js             # User schema (roles, saved recipes)
-│   └── Recipe.js           # Recipe schema (ingredients, instructions, ratings)
+│   ├── User.js                 # User schema (roles, savedRecipes)
+│   └── Recipe.js               # Recipe schema (ingredients, ratings)
 ├── routes/
-│   ├── authRoutes.js       # Auth endpoints
-│   └── recipeRoutes.js     # Recipe endpoints
-└── utils/
-    ├── AppError.js         # Custom operational error class
-    └── generateToken.js    # JWT sign helper
+│   ├── authRoutes.js
+│   └── recipeRoutes.js
+├── utils/
+│   ├── AppError.js             # Custom error class
+│   └── generateToken.js        # JWT helper
+├── .env.example
+└── package.json
 ```
 
 ---
 
-## Security Highlights
+## 🔒 Security Highlights
 
-- Passwords hashed with **bcrypt** (12 salt rounds)
-- **JWT tokens** signed with a long secret, verified on every protected request
-- User re-fetched from DB on each request (prevents stale token exploitation)
-- **Helmet** sets secure HTTP headers (HSTS, X-Content-Type-Options, etc.)
-- **CORS allowlist** — only whitelisted origins accepted (configurable via env)
-- **Rate limiting** — 200 req/15min globally, 20 req/15min on auth routes
-- **Body size limit** — 10kb max to prevent payload attacks
-- Author ID is stripped from PATCH body to prevent authorship reassignment
+| Layer | Detail |
+|---|---|
+| Password hashing | bcrypt with 12 salt rounds |
+| JWT verification | Token verified + user re-fetched on every request |
+| HTTP headers | Helmet (HSTS, X-Content-Type-Options, etc.) |
+| CORS | Allowlist-based, configurable via env |
+| Rate limiting | 200 req/15min global · 20 req/15min on auth routes |
+| Body size | 10kb limit to prevent payload attacks |
+| Error responses | Dev shows stack trace · Prod shows clean message only |
 
 ---
 
-## License
+## 📄 License
 
-MIT
+MIT © [Vinay](https://github.com/vinayviratwork)
