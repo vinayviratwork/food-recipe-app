@@ -23,7 +23,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       minlength: [8, "Password must be at least 8 characters"],
-      // Never return the hashed password in query results by default
       select: false,
     },
     profileImage: {
@@ -48,28 +47,21 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // createdAt / updatedAt managed automatically
+    timestamps: true,
   }
 );
 
-// Hash the password only when it has been modified — avoids double-hashing on unrelated updates
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-
-  const saltRounds = 12; // Higher cost factor for production-grade resistance to brute-force
+  const saltRounds = 12;
   this.password = await bcrypt.hash(this.password, saltRounds);
   next();
 });
 
-/**
- * Instance method kept on the schema rather than the controller to keep
- * password comparison logic co-located with the model that owns the field.
- */
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Strip sensitive fields before any toJSON serialization (e.g., API responses)
 userSchema.methods.toJSON = function () {
   const userObject = this.toObject();
   delete userObject.password;

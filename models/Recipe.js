@@ -3,10 +3,10 @@ import mongoose from "mongoose";
 const ingredientSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
-    quantity: { type: String, required: true, trim: true }, // e.g., "2 cups", "1 tbsp"
+    quantity: { type: String, required: true, trim: true },
     unit: { type: String, trim: true, default: "" },
   },
-  { _id: false } // Sub-documents here don't need their own ObjectId
+  { _id: false }
 );
 
 const instructionStepSchema = new mongoose.Schema(
@@ -46,7 +46,7 @@ const recipeSchema = new mongoose.Schema(
       },
     },
     cookingTime: {
-      type: Number, // stored in minutes
+      type: Number,
       required: [true, "Cooking time is required"],
       min: [1, "Cooking time must be at least 1 minute"],
     },
@@ -65,7 +65,6 @@ const recipeSchema = new mongoose.Schema(
     },
     tags: {
       type: [String],
-      // Normalise to lowercase so tag searches are case-insensitive at the data layer
       set: (tagList) => tagList.map((t) => t.toLowerCase().trim()),
     },
     category: {
@@ -113,13 +112,8 @@ const recipeSchema = new mongoose.Schema(
   }
 );
 
-// Compound index — the most frequent query pattern is browsing by category + tags
 recipeSchema.index({ category: 1, tags: 1 });
-
-// Text index enables full-text search across title and description fields
 recipeSchema.index({ title: "text", description: "text" });
-
-// Sorting by newest or most popular are the two dominant feed orderings
 recipeSchema.index({ createdAt: -1 });
 recipeSchema.index({ averageRating: -1 });
 

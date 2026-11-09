@@ -7,24 +7,23 @@ import {
   deleteRecipe,
   toggleSaveRecipe,
   getSavedRecipes,
+  rateRecipe,
 } from "../controllers/recipeController.js";
 import { protectRoute } from "../middlewares/auth.js";
 
 const router = Router();
 
-// Public routes — no token required for browsing
 router.get("/", getRecipes);
 router.get("/:id", getRecipeById);
 
-// Protected routes — valid JWT required
 router.use(protectRoute);
 
 router.post("/", createRecipe);
 router.patch("/:id", updateRecipe);
 router.delete("/:id", deleteRecipe);
 
-// Saved-recipes feature
 router.get("/user/saved", getSavedRecipes);
 router.post("/:id/save", toggleSaveRecipe);
+router.post("/:id/rate", rateRecipe);
 
 export default router;

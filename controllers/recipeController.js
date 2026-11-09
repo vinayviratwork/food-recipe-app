@@ -2,11 +2,6 @@ import Recipe from "../models/Recipe.js";
 import User from "../models/User.js";
 import AppError from "../utils/AppError.js";
 
-// ---------------------------------------------------------------------------
-// GET /api/recipes
-// Supports: ?page, ?limit, ?category, ?tags (comma-separated), ?difficulty,
-//           ?search (full-text), ?sort (newest | popular | cookingTime)
-// ---------------------------------------------------------------------------
 const getRecipes = async (req, res, next) => {
   try {
     const {
@@ -20,16 +15,14 @@ const getRecipes = async (req, res, next) => {
     } = req.query;
 
     const pageNumber = Math.max(1, parseInt(page, 10));
-    const pageSize = Math.min(50, Math.max(1, parseInt(limit, 10))); // Cap at 50 to protect the DB
+    const pageSize = Math.min(50, Math.max(1, parseInt(limit, 10)));
     const skipCount = (pageNumber - 1) * pageSize;
 
-    // Build the filter object incrementally so only provided params affect the query
     const filterQuery = { isPublished: true };
 
     if (category) filterQuery.category = category.toLowerCase();
     if (difficulty) filterQuery.difficulty = difficulty.toLowerCase();
 
-    // Tag filtering: accept "italian,vegetarian" and match documents containing ALL tags
     if (tags) {
       const extractedTags = tags
         .split(",")
@@ -41,7 +34,6 @@ const getRecipes = async (req, res, next) => {
       }
     }
 
-    // Full-text search uses the compound text index on title + description
     if (search) {
       filterQuery.$text = { $search: search };
     }
@@ -53,7 +45,6 @@ const getRecipes = async (req, res, next) => {
     };
     const appliedSort = sortOptions[sort] || sortOptions.newest;
 
-    // Run count and data fetch in parallel — avoids two sequential round-trips
     const [totalRecipes, recipeList] = await Promise.all([
       Recipe.countDocuments(filterQuery),
       Recipe.find(filterQuery)
@@ -61,7 +52,7 @@ const getRecipes = async (req, res, next) => {
         .sort(appliedSort)
         .skip(skipCount)
         .limit(pageSize)
-        .lean(), // lean() returns plain JS objects — faster for read-only payloads
+        .lean(),
     ]);
 
     res.status(200).json({
@@ -81,7 +72,6 @@ const getRecipes = async (req, res, next) => {
   }
 };
 
-// GET /api/recipes/:id
 const getRecipeById = async (req, res, next) => {
   try {
     const recipe = await Recipe.findById(req.params.id).populate(
@@ -99,14 +89,12 @@ const getRecipeById = async (req, res, next) => {
   }
 };
 
-// POST /api/recipes  (protected)
 const createRecipe = async (req, res, next) => {
   try {
     const recipePayload = { ...req.body, author: req.user._id };
 
     const newRecipe = await Recipe.create(recipePayload);
 
-    // Populate author info so the response mirrors what GET /recipes returns
     await newRecipe.populate("author", "username profileImage");
 
     res.status(201).json({ status: "success", recipe: newRecipe });
@@ -115,7 +103,6 @@ const createRecipe = async (req, res, next) => {
   }
 };
 
-// PATCH /api/recipes/:id  (protected — only the author or an admin may edit)
 const updateRecipe = async (req, res, next) => {
   try {
     const existingRecipe = await Recipe.findById(req.params.id);
@@ -124,7 +111,6 @@ const updateRecipe = async (req, res, next) => {
       return next(new AppError("No recipe found with that ID", 404));
     }
 
-    // toString() is necessary because ObjectId !== String in a strict comparison
     const isAuthor = existingRecipe.author.toString() === req.user._id.toString();
     const isAdmin = req.user.role === "admin";
 
@@ -132,7 +118,6 @@ const updateRecipe = async (req, res, next) => {
       return next(new AppError("You are not authorised to edit this recipe", 403));
     }
 
-    // Prevent re-assigning authorship through a PATCH request
     delete req.body.author;
 
     const updatedRecipe = await Recipe.findByIdAndUpdate(
@@ -147,7 +132,6 @@ const updateRecipe = async (req, res, next) => {
   }
 };
 
-// DELETE /api/recipes/:id  (protected — only the author or an admin may delete)
 const deleteRecipe = async (req, res, next) => {
   try {
     const existingRecipe = await Recipe.findById(req.params.id);
@@ -171,7 +155,6 @@ const deleteRecipe = async (req, res, next) => {
   }
 };
 
-// POST /api/recipes/:id/save  (protected — toggle save/unsave for the current user)
 const toggleSaveRecipe = async (req, res, next) => {
   try {
     const targetRecipeId = req.params.id;
@@ -195,7 +178,6 @@ const toggleSaveRecipe = async (req, res, next) => {
   }
 };
 
-// GET /api/recipes/saved  (protected — returns the current user's saved recipes)
 const getSavedRecipes = async (req, res, next) => {
   try {
     const userWithSaved = await User.findById(req.user._id).populate({
@@ -213,6 +195,41 @@ const getSavedRecipes = async (req, res, next) => {
   }
 };
 
+const rateRecipe = async (req, res, next) => {
+  try {
+    const { rating } = req.body;
+
+    if (!rating || typeof rating !== "number" || rating < 1 || rating > 5) {
+      return next(new AppError("Rating must be a number between 1 and 5", 400));
+    }
+
+    const recipe = await Recipe.findById(req.params.id);
+
+    if (!recipe) {
+      return next(new AppError("No recipe found with that ID", 404));
+    }
+
+    const newTotal = recipe.totalRatings + 1;
+    const newAverage = parseFloat(
+      ((recipe.averageRating * recipe.totalRatings + rating) / newTotal).toFixed(2)
+    );
+
+    const updatedRecipe = await Recipe.findByIdAndUpdate(
+      req.params.id,
+      { averageRating: newAverage, totalRatings: newTotal },
+      { new: true }
+    ).populate("author", "username profileImage");
+
+    res.status(200).json({
+      status: "success",
+      message: "Rating submitted successfully",
+      recipe: updatedRecipe,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export {
   getRecipes,
   getRecipeById,
@@ -221,4 +238,5 @@ export {
   deleteRecipe,
   toggleSaveRecipe,
   getSavedRecipes,
+  rateRecipe,
 };

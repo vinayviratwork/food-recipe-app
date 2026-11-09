@@ -2,12 +2,10 @@ import User from "../models/User.js";
 import AppError from "../utils/AppError.js";
 import generateToken from "../utils/generateToken.js";
 
-// POST /api/auth/register
 const registerUser = async (req, res, next) => {
   try {
     const { username, email, password, bio, profileImage } = req.body;
 
-    // Validate required fields early to avoid a wasted bcrypt hash cycle
     if (!username || !email || !password) {
       return next(new AppError("Username, email, and password are required", 400));
     }
@@ -23,7 +21,6 @@ const registerUser = async (req, res, next) => {
       );
     }
 
-    // Password hashing is handled by the pre-save hook in the User model
     const newUser = await User.create({
       username,
       email,
@@ -37,14 +34,13 @@ const registerUser = async (req, res, next) => {
     res.status(201).json({
       status: "success",
       accessToken,
-      user: newUser, // toJSON() strips password and __v automatically
+      user: newUser,
     });
   } catch (err) {
     next(err);
   }
 };
 
-// POST /api/auth/login
 const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -53,11 +49,9 @@ const loginUser = async (req, res, next) => {
       return next(new AppError("Email and password are required", 400));
     }
 
-    // Re-include password here — it's excluded by default via `select: false` on the schema
     const userCredentials = await User.findOne({ email }).select("+password");
 
     if (!userCredentials) {
-      // Deliberately vague message to prevent user enumeration via timing differences
       return next(new AppError("Invalid email or password", 401));
     }
 
@@ -72,26 +66,22 @@ const loginUser = async (req, res, next) => {
     res.status(200).json({
       status: "success",
       accessToken,
-      user: userCredentials, // toJSON() strips password before serialization
+      user: userCredentials,
     });
   } catch (err) {
     next(err);
   }
 };
 
-// GET /api/auth/me  (protected)
 const getMe = async (req, res) => {
-  // req.user is already populated by the protectRoute middleware
   res.status(200).json({
     status: "success",
     user: req.user,
   });
 };
 
-// PATCH /api/auth/update-profile  (protected)
 const updateProfile = async (req, res, next) => {
   try {
-    // Prevent users from escalating their own role through this endpoint
     const { password, role, ...allowedUpdates } = req.body;
 
     if (password) {
@@ -107,8 +97,8 @@ const updateProfile = async (req, res, next) => {
       req.user._id,
       allowedUpdates,
       {
-        new: true,          // Return the document after the update
-        runValidators: true, // Re-run schema validators on the changed fields
+        new: true,
+        runValidators: true,
       }
     );
 
@@ -121,4 +111,38 @@ const updateProfile = async (req, res, next) => {
   }
 };
 
-export { registerUser, loginUser, getMe, updateProfile };
+const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return next(new AppError("currentPassword and newPassword are required", 400));
+    }
+
+    if (newPassword.length < 8) {
+      return next(new AppError("New password must be at least 8 characters", 400));
+    }
+
+    const user = await User.findById(req.user._id).select("+password");
+    const isCorrect = await user.comparePassword(currentPassword);
+
+    if (!isCorrect) {
+      return next(new AppError("Current password is incorrect", 401));
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    const accessToken = generateToken(user._id);
+
+    res.status(200).json({
+      status: "success",
+      message: "Password updated successfully",
+      accessToken,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { registerUser, loginUser, getMe, updateProfile, changePassword };
