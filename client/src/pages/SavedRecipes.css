@@ -1,0 +1,22 @@
+.saved-page { padding: 40px 24px 80px; }
+.saved-header {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 36px;
+}
+.saved-icon { color: var(--primary); }
+.saved-header h1 { font-size: 1.6rem; font-weight: 800; color: var(--text); }
+.saved-header p { font-size: 0.9rem; color: var(--text-muted); margin-top: 2px; }
+.saved-loading, .saved-empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 14px;
+  min-height: 320px; color: var(--text-muted); text-align: center;
+}
+.saved-empty-icon { font-size: 3.5rem; }
+.saved-empty h3 { font-size: 1.1rem; font-weight: 700; color: var(--text-dim); }
+.saved-empty p { font-size: 0.9rem; }
+.saved-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.8s linear infinite; }

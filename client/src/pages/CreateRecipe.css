@@ -1,0 +1,104 @@
+.create-page { padding: 40px 24px 80px; max-width: 800px; }
+.create-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 36px;
+}
+.create-icon { color: var(--primary); }
+.create-header h1 { font-size: 1.6rem; font-weight: 800; color: var(--text); }
+.create-header p { font-size: 0.9rem; color: var(--text-muted); margin-top: 2px; }
+.create-form { display: flex; flex-direction: column; gap: 28px; }
+.form-section {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px;
+}
+.fs-title {
+  font-size: 0.88rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text-dim);
+  margin-bottom: 20px;
+}
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 7px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { font-size: 0.83rem; font-weight: 600; color: var(--text-dim); }
+.req { color: var(--primary); }
+.hint { font-weight: 400; color: var(--text-muted); }
+.form-group input, .form-group textarea, .form-group select {
+  padding: 10px 14px; border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); background: var(--bg);
+  font-size: 0.9rem; color: var(--text); outline: none;
+  transition: border-color 0.15s; resize: vertical;
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+  border-color: var(--primary); background: #fff;
+}
+.ingredients-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.ingredient-row { display: flex; gap: 10px; align-items: center; }
+.ing-name-input { flex: 2; }
+.ing-qty-input { flex: 1; }
+.ing-unit-input { flex: 1; }
+.ing-name-input, .ing-qty-input, .ing-unit-input {
+  padding: 9px 12px; border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); background: var(--bg);
+  font-size: 0.88rem; outline: none; transition: border-color 0.15s;
+}
+.ing-name-input:focus, .ing-qty-input:focus, .ing-unit-input:focus {
+  border-color: var(--primary); background: #fff;
+}
+.remove-btn {
+  background: #FFF0F0; border: 1px solid #FFCDD2; color: #C0392B;
+  padding: 8px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; flex-shrink: 0;
+  transition: background 0.15s;
+}
+.remove-btn:hover { background: #FFCDD2; }
+.add-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 9px 18px; border: 1.5px dashed var(--primary);
+  border-radius: var(--radius-sm); background: var(--primary-lt);
+  color: var(--primary); font-size: 0.85rem; font-weight: 600;
+  transition: background 0.15s;
+}
+.add-btn:hover { background: #FFE0CC; }
+.steps-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+.step-row { display: flex; gap: 12px; align-items: flex-start; }
+.step-num {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--primary); color: #fff;
+  font-size: 0.82rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 8px;
+}
+.step-row textarea {
+  flex: 1; padding: 10px 12px; border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); background: var(--bg);
+  font-size: 0.9rem; outline: none; resize: vertical;
+  transition: border-color 0.15s;
+}
+.step-row textarea:focus { border-color: var(--primary); background: #fff; }
+.form-actions {
+  display: flex; gap: 12px; justify-content: flex-end;
+  padding-top: 4px;
+}
+.cancel-btn {
+  padding: 12px 24px; border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); background: #fff;
+  font-size: 0.93rem; font-weight: 600; color: var(--text-dim);
+  transition: all 0.15s;
+}
+.cancel-btn:hover { border-color: var(--text-dim); color: var(--text); }
+.submit-btn {
+  padding: 12px 28px; background: var(--primary); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  font-size: 0.93rem; font-weight: 700;
+  display: flex; align-items: center; gap: 8px;
+  transition: background 0.15s;
+}
+.submit-btn:hover:not(:disabled) { background: var(--primary-dk); }
+.submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.7s linear infinite; }
+@media (max-width: 600px) {
+  .form-grid-2 { grid-template-columns: 1fr; }
+  .ingredient-row { flex-wrap: wrap; }
+  .ing-name-input { flex: none; width: 100%; }
+}
