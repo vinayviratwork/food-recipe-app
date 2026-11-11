@@ -1,27 +1,37 @@
-# 🍽️ Food Recipe App — REST API
+# 🍽️ RecipeHub — Full Stack Food Recipe App
 
 ![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat&logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-4.x-000000?style=flat&logo=express&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose%208-47A248?style=flat&logo=mongodb&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=white)
 ![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=flat&logo=jsonwebtokens&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=flat)
 
-A production-ready **RESTful backend API** for a food recipe platform built with Node.js, Express, and MongoDB. Includes JWT authentication, role-based access control, full-text search, pagination, star ratings, and multiple security hardening layers.
+> **A production-style MERN stack food recipe platform** with JWT authentication, full-text search, pagination, star ratings, and save-for-later — built with security hardening throughout.
+
+---
+
+## 🖥️ Project Preview
+
+| Home Page | Recipe Detail | Create Recipe |
+|---|---|---|
+| Hero + category grid + search | Star rating + ingredients + steps | Multi-step form with dynamic fields |
+
+> **Demo login:** `demo@recipehub.com` / `demo1234` · 12 pre-seeded recipes
 
 ---
 
 ## ✨ Features
 
-- **JWT Authentication** — secure register/login with bcrypt password hashing (12 salt rounds)
-- **Role-Based Access Control** — users vs admins; only authors/admins can edit or delete recipes
-- **Recipe Ratings** — users can rate recipes 1–5 stars with running average calculation
-- **Full-Text Search** — MongoDB compound text index on title and description
-- **Pagination & Filtering** — filter by category, difficulty, tags; sort by newest, popularity, or cooking time
-- **Save Recipes** — toggle save/unsave recipes to a personal list
-- **Change Password** — secure endpoint requiring current password verification
-- **Security Hardened** — Helmet headers, CORS allowlist, 10kb body limit, global + auth rate limiting
-- **Centralised Error Handling** — differentiates dev vs prod; handles Mongoose CastError, duplicate keys, JWT errors
-- **Graceful Shutdown** — catches unhandled rejections and closes server cleanly
+- **🔐 JWT Authentication** — register/login, bcrypt password hashing (12 rounds), token-based auth on every protected route
+- **👨‍🍳 Recipe CRUD** — create, read, update, delete with author-only or admin access control
+- **⭐ Star Ratings** — 1–5 star rating system with running average recalculation
+- **🔍 Full-Text Search** — MongoDB compound text index on title and description
+- **📄 Pagination & Filters** — filter by category, difficulty, tags; sort by newest, popular, cooking time
+- **🔖 Save Recipes** — toggle save/unsave to personal saved list
+- **🛡️ Security Hardened** — Helmet headers, CORS allowlist, rate limiting (200/15min global, 20/15min auth), 10kb body cap
+- **📱 Responsive UI** — React 19 SPA with React Router v7, mobile-friendly design
+- **🌱 Seed Data** — 12 real recipes + demo user ready to run
 
 ---
 
@@ -29,128 +39,91 @@ A production-ready **RESTful backend API** for a food recipe platform built with
 
 | Layer | Technology |
 |---|---|
-| Runtime | Node.js 18+ |
-| Framework | Express 4 |
+| Frontend | React 19, Vite 8, React Router v7, Axios, Lucide React |
+| Backend | Node.js 18+, Express 4 |
 | Database | MongoDB + Mongoose 8 |
 | Authentication | JWT + bcryptjs (12 rounds) |
 | Security | Helmet, CORS allowlist, express-rate-limit |
-| Logging | Morgan |
+| Notifications | react-hot-toast |
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Run Locally
 
 ### Prerequisites
 - Node.js v18+
 - MongoDB (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
 
-### Installation
-
 ```bash
-# 1. Clone the repo
+# 1. Clone
 git clone https://github.com/vinayviratwork/food-recipe-app.git
 cd food-recipe-app
 
-# 2. Install dependencies
+# 2. Install backend deps
 npm install
 
-# 3. Configure environment variables
-cp .env.example .env
-# Edit .env and fill in your values
+# 3. Install frontend deps
+cd client && npm install && cd ..
 
-# 4. Start the development server
-npm run dev
+# 4. Configure environment
+cp .env.example .env
+# Edit .env — set MONGO_URI, JWT_SECRET
 ```
 
-API runs at → `http://localhost:5000`
+```bash
+# Terminal 1 — Backend (port 5000)
+npm run dev
 
----
+# Terminal 2 — Frontend (port 3000)
+cd client && npm run dev
 
-## ⚙️ Environment Variables
+# (Optional) Seed sample data
+npm run seed
+```
 
-Copy `.env.example` to `.env`:
-
-| Variable | Description |
-|---|---|
-| `PORT` | Server port (default: `5000`) |
-| `NODE_ENV` | `development` or `production` |
-| `MONGO_URI` | MongoDB connection string |
-| `JWT_SECRET` | Long random secret for signing JWTs |
-| `JWT_EXPIRES_IN` | Token expiry e.g. `7d` |
-| `ALLOWED_ORIGINS` | Comma-separated CORS origins |
+Open → `http://localhost:3000`
+Login → `demo@recipehub.com` / `demo1234`
 
 ---
 
 ## 📡 API Reference
 
+Base URL: `http://localhost:5000`
+
 ### Auth — `/api/auth`
 
-| Method | Endpoint | Description | Auth |
+| Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| POST | `/api/auth/register` | Register a new user | ❌ |
-| POST | `/api/auth/login` | Login and receive JWT | ❌ |
-| GET | `/api/auth/me` | Get current user profile | ✅ |
-| PATCH | `/api/auth/update-profile` | Update username, bio, profileImage | ✅ |
-| PATCH | `/api/auth/change-password` | Change password (requires currentPassword) | ✅ |
+| POST | `/api/auth/register` | ❌ | Register new user |
+| POST | `/api/auth/login` | ❌ | Login + receive JWT |
+| GET | `/api/auth/me` | ✅ | Get current user |
+| PATCH | `/api/auth/update-profile` | ✅ | Update username, bio, image |
+| PATCH | `/api/auth/change-password` | ✅ | Change password |
 
 ### Recipes — `/api/recipes`
 
-| Method | Endpoint | Description | Auth |
+| Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| GET | `/api/recipes` | List recipes (paginated, filterable) | ❌ |
-| GET | `/api/recipes/:id` | Get a single recipe | ❌ |
-| POST | `/api/recipes` | Create a recipe | ✅ |
-| PATCH | `/api/recipes/:id` | Update a recipe (author/admin only) | ✅ |
-| DELETE | `/api/recipes/:id` | Delete a recipe (author/admin only) | ✅ |
-| POST | `/api/recipes/:id/rate` | Rate a recipe (1–5 stars) | ✅ |
-| GET | `/api/recipes/user/saved` | Get current user's saved recipes | ✅ |
-| POST | `/api/recipes/:id/save` | Toggle save/unsave a recipe | ✅ |
+| GET | `/api/recipes` | ❌ | List (paginated, filterable) |
+| GET | `/api/recipes/:id` | ❌ | Single recipe |
+| POST | `/api/recipes` | ✅ | Create recipe |
+| PATCH | `/api/recipes/:id` | ✅ | Update (author/admin only) |
+| DELETE | `/api/recipes/:id` | ✅ | Delete (author/admin only) |
+| POST | `/api/recipes/:id/rate` | ✅ | Rate 1–5 stars |
+| GET | `/api/recipes/user/saved` | ✅ | Saved recipes list |
+| POST | `/api/recipes/:id/save` | ✅ | Toggle save/unsave |
 
-### Query Parameters — `GET /api/recipes`
+### Query Params — `GET /api/recipes`
 
 | Param | Example | Description |
 |---|---|---|
 | `page` | `?page=2` | Page number (default: 1) |
-| `limit` | `?limit=10` | Results per page (max: 50) |
+| `limit` | `?limit=10` | Per page (max: 50) |
 | `category` | `?category=dinner` | Filter by category |
 | `difficulty` | `?difficulty=beginner` | Filter by difficulty |
-| `tags` | `?tags=italian,vegetarian` | Comma-separated tags (AND logic) |
-| `search` | `?search=pasta` | Full-text search on title + description |
+| `tags` | `?tags=italian,veg` | Tags (AND logic) |
+| `search` | `?search=pasta` | Full-text search |
 | `sort` | `?sort=popular` | `newest` \| `popular` \| `cookingTime` |
-
-### Health
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/health` | Server status + environment |
-
----
-
-## 📁 Project Structure
-
-```
-food-recipe-app/
-├── app.js                      # Express app + middleware setup
-├── config/
-│   └── db.js                   # MongoDB connection
-├── controllers/
-│   ├── authController.js       # Register, login, profile, password
-│   └── recipeController.js     # CRUD, save, rate, search
-├── middlewares/
-│   ├── auth.js                 # JWT verification middleware
-│   └── errorHandler.js         # Global error handler
-├── models/
-│   ├── User.js                 # User schema (roles, savedRecipes)
-│   └── Recipe.js               # Recipe schema (ingredients, ratings)
-├── routes/
-│   ├── authRoutes.js
-│   └── recipeRoutes.js
-├── utils/
-│   ├── AppError.js             # Custom error class
-│   └── generateToken.js        # JWT helper
-├── .env.example
-└── package.json
-```
 
 ---
 
@@ -158,13 +131,47 @@ food-recipe-app/
 
 | Layer | Detail |
 |---|---|
-| Password hashing | bcrypt with 12 salt rounds |
-| JWT verification | Token verified + user re-fetched on every request |
+| Password hashing | bcrypt — 12 salt rounds |
+| JWT | Verified + user re-fetched on every request |
 | HTTP headers | Helmet (HSTS, X-Content-Type-Options, etc.) |
-| CORS | Allowlist-based, configurable via env |
-| Rate limiting | 200 req/15min global · 20 req/15min on auth routes |
-| Body size | 10kb limit to prevent payload attacks |
-| Error responses | Dev shows stack trace · Prod shows clean message only |
+| CORS | Allowlist-based, env-configurable |
+| Rate limiting | 200 req/15min global · 20 req/15min auth |
+| Body size | 10kb cap to prevent payload attacks |
+| Error responses | Dev: stack trace · Prod: clean message |
+
+---
+
+## 📁 Project Structure
+
+```
+food-recipe-app/
+├── app.js                      # Express entry — middleware + routing
+├── config/db.js                # MongoDB connection
+├── controllers/
+│   ├── authController.js       # Register, login, profile, password
+│   └── recipeController.js     # CRUD, save, rate, pagination
+├── middlewares/
+│   ├── auth.js                 # JWT verification
+│   └── errorHandler.js         # Global error normaliser
+├── models/
+│   ├── User.js                 # Schema: roles, savedRecipes, bcrypt hook
+│   └── Recipe.js               # Schema: ingredients, steps, ratings, indexes
+├── routes/
+│   ├── authRoutes.js
+│   └── recipeRoutes.js
+├── utils/
+│   ├── AppError.js
+│   └── generateToken.js
+├── seed.js                     # 12 recipes + demo user
+├── .env.example
+└── client/                     # React 19 + Vite 8 frontend
+    └── src/
+        ├── App.jsx
+        ├── context/AuthContext.jsx
+        ├── pages/              # Home, Login, Register, CreateRecipe, SavedRecipes
+        ├── components/         # Navbar, RecipeCard, RecipeModal
+        └── utils/api.js        # Axios instance + interceptors
+```
 
 ---
 
